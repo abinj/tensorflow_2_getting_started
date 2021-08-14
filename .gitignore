@@ -1,0 +1,49 @@
+.idea
+/node_modules
+/build
+
+venv/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+.idea
+__pycache__
+
+.cache
+*.czml
+*.data
+*.preds
+*.bsp
+*.dat
+*.so
+*.pdf
+*.bak
+*.h5
+*.zip
+*.jpg
+*.jpeg
+*.tif
+*.tiff
+*.npy
+*.pkl
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+venv/
