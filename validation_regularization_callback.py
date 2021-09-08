@@ -4,6 +4,9 @@ from sklearn.model_selection import train_test_split
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 import matplotlib.pyplot as plt
+from tensorflow.keras.layers import Dropout
+from tensorflow.keras import regularizers
+from tensorflow.keras.callbacks import Callback
 
 diabetes_dataset = load_diabetes()
 print(diabetes_dataset["DESCR"])
@@ -54,5 +57,66 @@ plt.ylabel('Loss')
 plt.xlabel('Epoch')
 plt.legend(['Training', 'Validation'], loc='upper right')
 plt.show()
+
+# Model regularization
+def get_regularized_model(wd, rate):
+    model = Sequential([
+        Dense(128, kernel_regularizer=regularizers.l2(wd), activation="relu", input_shape=(train_data.shape[1],)),
+        Dropout(rate),
+        Dense(128, kernel_regularizer=regularizers.l2(wd), activation="relu"),
+        Dropout(rate),
+        Dense(128, kernel_regularizer=regularizers.l2(wd), activation="relu"),
+        Dropout(rate),
+        Dense(128, kernel_regularizer=regularizers.l2(wd), activation="relu"),
+        Dropout(rate),
+        Dense(128, kernel_regularizer=regularizers.l2(wd), activation="relu"),
+        Dropout(rate),
+        Dense(128, kernel_regularizer=regularizers.l2(wd), activation="relu"),
+        Dense(1)
+    ])
+    return model
+
+# Re-build the model with weight decay and dropout layers
+model = get_regularized_model(1e-5, 0.3)
+
+# Compile the model
+model.compile(optimizer="adam", loss="mse", metrics=["mae"])
+
+# Train the model with validation set
+history = model.fit(train_data, train_targets, epochs=100, validation_split=0.15, batch_size=64, verbose=False)
+
+# Evaluate the model on test set
+model.evaluate(test_data, test_targets, verbose=2)
+
+# Plot the learning curves
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('Loss vs epochs')
+plt.ylabel('Loss')
+plt.xlabel('Epoch')
+plt.legend(['Training', 'Validation'], loc='upper right')
+plt.show()
+
+
+# Callbacks
+class TrainingCallback(Callback):
+    def on_train_begin(self, logs=None):
+        print("Starting Training....")
+    def on_epoch_begin(self, epoch, logs=None):
+        print(f"Starting epoch {epoch}")
+    def on_train_batch_begin(self, batch, logs=None):
+        print(f"Training: Starting batch {batch}")
+    def on_train_batch_end(self, batch, logs=None):
+        print(f"Training: finished batch {batch}")
+    def on_epoch_end(self, epoch, logs=None):
+        print(f"Finished epoch {epoch}")
+    def on_train_end(self, logs=None):
+        print("Training End")
+
+model = get_regularized_model(1e-5, 0.3)
+model.compile(optimizer="adam", loss="mse")
+model.fit(train_data, train_targets, epochs=3, batch_size=128, verbose=False, callbacks=[TrainingCallback()])
+model.evaluate(test_data, test_targets, verbose=False)
+prediction_out = model.predict(test_data, verbose=False)
 
 
